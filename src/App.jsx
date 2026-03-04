@@ -53,19 +53,22 @@ const DATA = {
       { cat: "Alignment", opts: [
         { text: "Heroic — help everyone you can", align: "good" },
         { text: "Self-serving — your needs come first", align: "evil" },
-        { text: "Chaotic — let morality be situational", align: null },
+        { text: "Chaotic — let morality be situational", align: "grey" },
+        { text: "Pragmatic — do what's necessary, no matter the cost", align: "grey" },
       ]},
       { cat: "Dialogue Approach", opts: [
         { text: "Persuasion & charm", align: "good" },
         { text: "Intimidation", align: "evil" },
         { text: "Deception & lies", align: "evil" },
         { text: "Insight — read everyone", align: null },
+        { text: "Whatever works in the moment", align: "grey" },
       ]},
       { cat: "Roleplay Focus", opts: [
         { text: "Min-max every build", align: null },
         { text: "Lean into your character concept", align: null },
         { text: "Complete every side quest", align: "good" },
         { text: "Rush the main story", align: null },
+        { text: "Make every choice based on personal gain", align: "grey" },
       ]},
     ],
     spoiler: [
@@ -76,10 +79,10 @@ const DATA = {
       { cat: "Act 1 — The Grove", opts: [
         { text: "Save the Grove (defeat the goblin leaders)", align: "good" },
         { text: "Side with the goblins (Minthara route)", align: "evil" },
-        { text: "Knock out Minthara — recruit both her and Halsin", align: null },
+        { text: "Knock out Minthara — recruit both her and Halsin", align: "grey" },
       ]},
       { cat: "Act 3 — Allegiance", opts: [
-        { text: "Side with the Emperor (Mind Flayer)", align: null },
+        { text: "Side with the Emperor (Mind Flayer)", align: "grey" },
         { text: "Trust Orpheus the Githyanki Prince", align: "good" },
         { text: "Sacrifice a companion to become a Mind Flayer", align: "evil" },
       ]},
@@ -93,26 +96,32 @@ const DATA = {
     { cat: "Shadowheart", opts: [
       { text: "Help Shadowheart embrace Shar's will", align: "evil" },
       { text: "Guide Shadowheart away from Shar toward the light", align: "good" },
+      { text: "Let Shadowheart make her own choice without interference", align: "grey" },
     ]},
     { cat: "Astarion", opts: [
       { text: "Let Astarion perform the Rite of Profane Ascension", align: "evil" },
       { text: "Convince Astarion to remain a regular spawn — and be free", align: "good" },
+      { text: "Support Astarion in whatever he chooses — it's his life", align: "grey" },
     ]},
     { cat: "Gale", opts: [
       { text: "Help Gale resist the orb and find a cure", align: "good" },
       { text: "Encourage Gale to detonate the orb for godhood", align: "evil" },
-      { text: "Support Gale in becoming the new god of ambition", align: "evil" },
+      { text: "Support Gale in becoming the new god of ambition", align: "grey" },
     ]},
     { cat: "Wyll", opts: [
       { text: "Help Wyll break his pact with Mizora and free his father", align: "good" },
       { text: "Let Wyll renew his pact — his soul for his father's life", align: "evil" },
-      { text: "Encourage Wyll to embrace being the Blade of Avernus", align: null },
+      { text: "Encourage Wyll to embrace being the Blade of Avernus", align: "grey" },
     ]},
   ],
 };
 
 const EMOJI = { Barbarian:"⚔️", Bard:"🎵", Cleric:"✨", Druid:"🌿", Fighter:"🛡️", Monk:"👊", Paladin:"⚜️", Ranger:"🏹", Rogue:"🗡️", Sorcerer:"🌀", Warlock:"👁️", Wizard:"🔮" };
-const ALIGN_LABEL = { good: { icon: "🌟", color: "#90d4a0" }, evil: { icon: "💀", color: "#d47090" } };
+const ALIGN_LABEL = {
+  good: { icon: "🌟", color: "#90d4a0" },
+  grey: { icon: "⚖️", color: "#a0b4d4" },
+  evil: { icon: "💀", color: "#d47090" },
+};
 
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const pickN = (arr, n) => [...arr].sort(() => Math.random() - 0.5).slice(0, Math.min(n, arr.length));
@@ -202,10 +211,10 @@ export default function App() {
     setSubmitStatus("sending");
     try {
       await emailjs.send(
-        "service_lmctiqe",
-        "template_gn9uspd",
+        "YOUR_SERVICE_ID",
+        "YOUR_TEMPLATE_ID",
         { message: featureText },
-        "tJsPBE_KNDTMKvTdS"
+        "YOUR_PUBLIC_KEY"
       );
       setSubmitStatus("sent");
       setFeatureText("");
@@ -245,6 +254,14 @@ export default function App() {
     </div>
   );
 
+  const rollBtnBg = alignment === "evil"
+    ? "linear-gradient(135deg,#5a1020,#c04060,#5a1020)"
+    : alignment === "good"
+    ? "linear-gradient(135deg,#1a4a20,#40a060,#1a4a20)"
+    : alignment === "grey"
+    ? "linear-gradient(135deg,#1a2a4a,#4060a0,#1a2a4a)"
+    : "linear-gradient(135deg,#7a5910,#c4a35a,#7a5910)";
+
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#0a0a16 0%,#16082a 50%,#080f08 100%)", fontFamily: "Georgia,serif", color: "#e8d5a3" }}>
       <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}.fu{animation:fadeUp .38s ease}`}</style>
@@ -277,13 +294,14 @@ export default function App() {
           <div style={{ ...lbl, marginBottom: ".75rem" }}>Playthrough Alignment <span style={{ opacity: .6, textTransform: "none", letterSpacing: 0 }}>(optional — click to toggle)</span></div>
           <div style={{ display: "flex", gap: ".75rem" }}>
             <AlignBtn v="good" label="🌟 Good" desc="Lean toward heroic choices" color="#90d4a0" />
+            <AlignBtn v="grey" label="⚖️ Morally Grey" desc="Ambiguous & complex choices" color="#a0b4d4" />
             <AlignBtn v="evil" label="💀 Evil" desc="Lean toward dark choices" color="#d47090" />
           </div>
           {alignment && <div style={{ marginTop: ".75rem", fontSize: ".78rem", color: "#907050", fontStyle: "italic" }}>Alignment labels will appear on your rolled decisions. Choices are weighted but not guaranteed — chaos finds a way.</div>}
         </div>
 
         {/* Roll button */}
-        <button onClick={roll} style={{ width: "100%", padding: "1.05rem", background: alignment === "evil" ? "linear-gradient(135deg,#5a1020,#c04060,#5a1020)" : alignment === "good" ? "linear-gradient(135deg,#1a4a20,#40a060,#1a4a20)" : "linear-gradient(135deg,#7a5910,#c4a35a,#7a5910)", border: "none", borderRadius: "10px", color: "#fff", fontFamily: "Georgia,serif", fontSize: "1.05rem", fontWeight: "bold", letterSpacing: ".1em", cursor: "pointer", textTransform: "uppercase", boxShadow: "0 4px 22px rgba(196,163,90,.28)", marginBottom: "1.75rem", transition: "background .4s" }}>🎲 Roll My Playthrough</button>
+        <button onClick={roll} style={{ width: "100%", padding: "1.05rem", background: rollBtnBg, border: "none", borderRadius: "10px", color: "#fff", fontFamily: "Georgia,serif", fontSize: "1.05rem", fontWeight: "bold", letterSpacing: ".1em", cursor: "pointer", textTransform: "uppercase", boxShadow: "0 4px 22px rgba(196,163,90,.28)", marginBottom: "1.75rem", transition: "background .4s" }}>🎲 Roll My Playthrough</button>
 
         {/* Results */}
         {res && (
