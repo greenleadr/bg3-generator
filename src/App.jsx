@@ -21,7 +21,7 @@ const DATA = {
     Cleric: ["Pure healer — keep your party alive above all", "Battle cleric — armoured and on the front line", "Blaster — smite enemies with divine power from range"],
     Druid: ["Wild Shape brawler — transform and fight up close", "Summoner — let your creatures do the work", "Spell artillery — control the battlefield from safety"],
     Fighter: ["Relentless aggressor — never stop pressing the attack", "Tactical controller — use manoeuvres to dictate the fight", "Durable anchor — hold the line and protect allies"],
-    Monk: ["Mobile striker — hit fast, move constantly", "Crowd controller — stun and lock down enemies", "Glass cannon — maximise damage output, stay out of range"],
+    Monk: ["Mobile striker — hit fast, move constantly", "Crowd controller — stun and lock down enemies", "Glass cannon — maximise damage, stay out of range"],
     Paladin: ["Smite everything — front line holy damage dealer", "Protector — keep allies alive with auras and healing", "Intimidating tank — draw fire and punish attackers"],
     Ranger: ["Pure archer — stay at max range at all times", "Beast companion focus — let your animal do the heavy lifting", "Ambush striker — stealth approach, devastating opening attack"],
     Rogue: ["Classic assassin — stealth kill before combat begins", "Skirmisher — attack from flanks and stay mobile", "Arcane trickster — use spells to set up sneak attacks"],
@@ -40,7 +40,6 @@ const DATA = {
     "Half-Orc": ["Half-Orc"],
     "Githyanki": ["Githyanki"],
     "Dragonborn": ["Black Dragonborn", "Blue Dragonborn", "Brass Dragonborn", "Bronze Dragonborn", "Copper Dragonborn", "Gold Dragonborn", "Green Dragonborn", "Red Dragonborn", "Silver Dragonborn", "White Dragonborn"],
-    "Duergar": ["Duergar"],
   },
   backgrounds: ["Acolyte", "Charlatan", "Criminal", "Entertainer", "Folk Hero", "Guild Artisan", "Haunted One", "Noble", "Outlander", "Sage", "Soldier", "Urchin"],
   companions: [
@@ -48,25 +47,72 @@ const DATA = {
     { name: "Lae'zel", act: 1 }, { name: "Wyll", act: 1 }, { name: "Karlach", act: 1 },
     { name: "Halsin", act: 2 }, { name: "Minthara", act: 2 }, { name: "Jaheira", act: 2 }, { name: "Minsc", act: 3 },
   ],
+  // alignment: "good" | "evil" | null
   decisions: {
     safe: [
-      { cat: "Alignment", opts: ["Heroic — help everyone you can", "Self-serving — your needs come first", "Chaotic — let morality be situational"] },
-      { cat: "Dialogue Approach", opts: ["Persuasion & charm", "Intimidation", "Deception & lies", "Insight — read everyone"] },
-      { cat: "Roleplay Focus", opts: ["Min-max every build", "Lean into your character concept", "Complete every side quest", "Rush the main story"] },
+      { cat: "Alignment", opts: [
+        { text: "Heroic — help everyone you can", align: "good" },
+        { text: "Self-serving — your needs come first", align: "evil" },
+        { text: "Chaotic — let morality be situational", align: null },
+      ]},
+      { cat: "Dialogue Approach", opts: [
+        { text: "Persuasion & charm", align: "good" },
+        { text: "Intimidation", align: "evil" },
+        { text: "Deception & lies", align: "evil" },
+        { text: "Insight — read everyone", align: null },
+      ]},
+      { cat: "Roleplay Focus", opts: [
+        { text: "Min-max every build", align: null },
+        { text: "Lean into your character concept", align: null },
+        { text: "Complete every side quest", align: "good" },
+        { text: "Rush the main story", align: null },
+      ]},
     ],
     spoiler: [
-      { cat: "Origin", opts: ["Play as Tav (custom character)", "Play as Dark Urge"] },
-      { cat: "Act 1 — The Grove", opts: ["Save the Grove (defeat the goblin leaders)", "Side with the goblins (Minthara route)", "Knock out Minthara — recruit both her and Halsin"] },
-      { cat: "Shadowheart's Path", opts: ["Help Shadowheart embrace Shar's will", "Guide Shadowheart away from Shar toward the light"] },
-      { cat: "Astarion's Fate", opts: ["Let Astarion perform the Rite of Profane Ascension", "Convince Astarion to remain a regular spawn"] },
-      { cat: "Act 3 — Allegiance", opts: ["Side with the Emperor (Mind Flayer)", "Trust Orpheus the Githyanki Prince", "Sacrifice a companion to become a Mind Flayer"] },
-      { cat: "Ending", opts: ["Destroy the Netherbrain", "Dominate the Netherbrain and seize power"] },
+      { cat: "Origin", opts: [
+        { text: "Play as Tav (custom character)", align: null },
+        { text: "Play as Dark Urge", align: "evil" },
+      ]},
+      { cat: "Act 1 — The Grove", opts: [
+        { text: "Save the Grove (defeat the goblin leaders)", align: "good" },
+        { text: "Side with the goblins (Minthara route)", align: "evil" },
+        { text: "Knock out Minthara — recruit both her and Halsin", align: null },
+      ]},
+      { cat: "Act 3 — Allegiance", opts: [
+        { text: "Side with the Emperor (Mind Flayer)", align: null },
+        { text: "Trust Orpheus the Githyanki Prince", align: "good" },
+        { text: "Sacrifice a companion to become a Mind Flayer", align: "evil" },
+      ]},
+      { cat: "Ending", opts: [
+        { text: "Destroy the Netherbrain", align: "good" },
+        { text: "Dominate the Netherbrain and seize power", align: "evil" },
+      ]},
     ],
   },
+  companionQuests: [
+    { cat: "Shadowheart", opts: [
+      { text: "Help Shadowheart embrace Shar's will", align: "evil" },
+      { text: "Guide Shadowheart away from Shar toward the light", align: "good" },
+    ]},
+    { cat: "Astarion", opts: [
+      { text: "Let Astarion perform the Rite of Profane Ascension", align: "evil" },
+      { text: "Convince Astarion to remain a regular spawn — and be free", align: "good" },
+    ]},
+    { cat: "Gale", opts: [
+      { text: "Help Gale resist the orb and find a cure", align: "good" },
+      { text: "Encourage Gale to detonate the orb for godhood", align: "evil" },
+      { text: "Support Gale in becoming the new god of ambition", align: "evil" },
+    ]},
+    { cat: "Wyll", opts: [
+      { text: "Help Wyll break his pact with Mizora and free his father", align: "good" },
+      { text: "Let Wyll renew his pact — his soul for his father's life", align: "evil" },
+      { text: "Encourage Wyll to embrace being the Blade of Avernus", align: null },
+    ]},
+  ],
 };
 
 const EMOJI = { Barbarian:"⚔️", Bard:"🎵", Cleric:"✨", Druid:"🌿", Fighter:"🛡️", Monk:"👊", Paladin:"⚜️", Ranger:"🏹", Rogue:"🗡️", Sorcerer:"🌀", Warlock:"👁️", Wizard:"🔮" };
-const DEMOJI = { "Alignment":"⚖️", "Dialogue Approach":"💬", "Roleplay Focus":"🎭", "Origin":"🎭", "Act 1 — The Grove":"🌿", "Shadowheart's Path":"🌑", "Astarion's Fate":"🧛", "Act 3 — Allegiance":"🧠", "Ending":"👑" };
+const ALIGN_LABEL = { good: { icon: "🌟", color: "#90d4a0" }, evil: { icon: "💀", color: "#d47090" } };
 
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const pickN = (arr, n) => [...arr].sort(() => Math.random() - 0.5).slice(0, Math.min(n, arr.length));
@@ -74,20 +120,39 @@ const CLS = Object.keys(DATA.classes);
 
 function pickRace() {
   const race = pick(Object.keys(DATA.races));
-  const subraces = DATA.races[race];
-  const subrace = pick(subraces);
-  return subrace === race ? subrace : subrace;
+  return pick(DATA.races[race]);
 }
 
-function generate(sp, cm) {
+function weightedPick(opts, alignment) {
+  if (!alignment) return pick(opts);
+  const aligned = opts.filter(o => o.align === alignment);
+  const neutral = opts.filter(o => o.align === null);
+  const pool = [...aligned, ...aligned, ...neutral]; // 2:1 weight toward alignment
+  return pick(pool.length ? pool : opts);
+}
+
+function generate(sp, cm, alignment) {
   const pc = pick(CLS);
   const pool = cm === "party" ? DATA.companions.filter(c => c.act === 1) : DATA.companions;
   const count = cm === "party" ? 3 : cm === "random" ? Math.floor(Math.random() * 4) + 3 : parseInt(cm);
   const comps = pickN(pool, count).map(c => { const ac = pick(CLS); return { ...c, cls: ac, sub: pick(DATA.classes[ac]) }; });
-  const decisions = (sp === "safe" ? DATA.decisions.safe : [...DATA.decisions.safe, ...DATA.decisions.spoiler])
-    .map(d => ({ cat: d.cat, choice: pick(d.opts) }));
+
+  const decisionSets = sp === "safe" ? DATA.decisions.safe : [...DATA.decisions.safe, ...DATA.decisions.spoiler];
+  const decisions = decisionSets.map(d => {
+    const chosen = weightedPick(d.opts, alignment);
+    return { cat: d.cat, choice: chosen.text, align: chosen.align };
+  });
+
+  const companionQuests = DATA.companionQuests.map(d => {
+    const chosen = weightedPick(d.opts, alignment);
+    return { cat: d.cat, choice: chosen.text, align: chosen.align };
+  });
+
   return {
-    origin: sp === "safe" ? "Custom Character (Tav)" : pick(["Custom Character (Tav)", "Dark Urge"]),
+    origin: sp === "safe" ? "Custom Character (Tav)" : weightedPick([
+      { text: "Custom Character (Tav)", align: "good" },
+      { text: "Dark Urge", align: "evil" },
+    ], alignment).text,
     pClass: pc,
     pSub: pick(DATA.classes[pc]),
     pRace: pickRace(),
@@ -95,6 +160,7 @@ function generate(sp, cm) {
     bg: pick(DATA.backgrounds),
     comps,
     decisions,
+    companionQuests,
   };
 }
 
@@ -105,9 +171,11 @@ const secTitle = { margin: "0 0 1rem", fontSize: ".72rem", letterSpacing: ".22em
 export default function App() {
   const [sp, setSp] = useState("safe");
   const [cm, setCm] = useState("random");
+  const [alignment, setAlignment] = useState(null);
   const [res, setRes] = useState(null);
   const [ok, setOk] = useState(false);
-  const roll = useCallback(() => { setRes(generate(sp, cm)); setOk(false); }, [sp, cm]);
+  const roll = useCallback(() => { setRes(generate(sp, cm, alignment)); setOk(false); }, [sp, cm, alignment]);
+
   const copy = () => {
     if (!res) return;
     const txt = [
@@ -121,7 +189,9 @@ export default function App() {
       "", "PARTY",
       ...res.comps.map(c => `${c.name}: ${c.cls} — ${c.sub}`),
       "", "KEY DECISIONS",
-      ...res.decisions.map(d => `${d.cat}: ${d.choice}`)
+      ...res.decisions.map(d => `${d.cat}: ${d.choice}`),
+      "", "COMPANION QUESTS",
+      ...res.companionQuests.map(d => `${d.cat}: ${d.choice}`),
     ].join("\n");
     navigator.clipboard.writeText(txt).then(() => { setOk(true); setTimeout(() => setOk(false), 2500); });
   };
@@ -131,6 +201,27 @@ export default function App() {
       <span style={{ fontWeight: "bold", fontSize: ".875rem" }}>{main}</span>
       {sub && <><br /><span style={{ fontSize: ".72rem", opacity: .7 }}>{sub}</span></>}
     </button>
+  );
+
+  const AlignBtn = ({ v, label, desc, color }) => (
+    <button onClick={() => setAlignment(alignment === v ? null : v)} style={{ flex: 1, padding: ".65rem .9rem", borderRadius: "8px", border: alignment === v ? `1px solid ${color}` : "1px solid rgba(196,163,90,.18)", background: alignment === v ? `${color}22` : "rgba(255,255,255,.025)", cursor: "pointer", color: alignment === v ? color : "#907868", fontFamily: "Georgia,serif", textAlign: "center" }}>
+      <div style={{ fontWeight: "bold", fontSize: ".875rem" }}>{label}</div>
+      <div style={{ fontSize: ".72rem", opacity: .7 }}>{desc}</div>
+    </button>
+  );
+
+  const DecisionRow = ({ d }) => (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: ".75rem", padding: ".75rem .9rem", background: "rgba(196,163,90,.05)", borderRadius: "8px", border: "1px solid rgba(196,163,90,.1)", marginBottom: ".55rem" }}>
+      <div style={{ flexGrow: 1 }}>
+        <div style={lbl}>{d.cat}</div>
+        <div style={{ color: "#f5e090", fontSize: ".93rem" }}>{d.choice}</div>
+      </div>
+      {d.align && alignment && (
+        <span style={{ fontSize: ".75rem", fontWeight: "bold", color: ALIGN_LABEL[d.align].color, flexShrink: 0, marginTop: ".2rem", background: `${ALIGN_LABEL[d.align].color}22`, padding: ".2rem .5rem", borderRadius: "4px" }}>
+          {ALIGN_LABEL[d.align].icon} {d.align}
+        </span>
+      )}
+    </div>
   );
 
   return (
@@ -146,7 +237,7 @@ export default function App() {
       <div style={{ maxWidth: "820px", margin: "0 auto", padding: "2rem 1.25rem" }}>
         <div style={cardSt}>
           <h2 style={secTitle}>⚙️ Options</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.25rem" }}>
             <div>
               <div style={{ ...lbl, marginBottom: ".75rem" }}>Spoiler Tolerance</div>
               <OBtn v="safe" cur={sp} set={setSp} main="🙈 Spoiler-Free" sub="Style, alignment & approach" />
@@ -160,20 +251,22 @@ export default function App() {
               <OBtn v="6" cur={cm} set={setCm} main="6 companions" />
             </div>
           </div>
+          <div style={{ ...lbl, marginBottom: ".75rem" }}>Playthrough Alignment <span style={{ opacity: .6, textTransform: "none", letterSpacing: 0 }}>(optional — click to toggle)</span></div>
+          <div style={{ display: "flex", gap: ".75rem" }}>
+            <AlignBtn v="good" label="🌟 Good" desc="Lean toward heroic choices" color="#90d4a0" />
+            <AlignBtn v="evil" label="💀 Evil" desc="Lean toward dark choices" color="#d47090" />
+          </div>
+          {alignment && <div style={{ marginTop: ".75rem", fontSize: ".78rem", color: "#907050", fontStyle: "italic" }}>Alignment labels will appear on your rolled decisions. Choices are weighted but not guaranteed — chaos finds a way.</div>}
         </div>
 
-        <button onClick={roll} style={{ width: "100%", padding: "1.05rem", background: "linear-gradient(135deg,#7a5910,#c4a35a,#7a5910)", border: "none", borderRadius: "10px", color: "#1a0e00", fontFamily: "Georgia,serif", fontSize: "1.05rem", fontWeight: "bold", letterSpacing: ".1em", cursor: "pointer", textTransform: "uppercase", boxShadow: "0 4px 22px rgba(196,163,90,.28)", marginBottom: "1.75rem" }}>🎲 Roll My Playthrough</button>
+        <button onClick={roll} style={{ width: "100%", padding: "1.05rem", background: alignment === "evil" ? "linear-gradient(135deg,#5a1020,#c04060,#5a1020)" : alignment === "good" ? "linear-gradient(135deg,#1a4a20,#40a060,#1a4a20)" : "linear-gradient(135deg,#7a5910,#c4a35a,#7a5910)", border: "none", borderRadius: "10px", color: "#fff", fontFamily: "Georgia,serif", fontSize: "1.05rem", fontWeight: "bold", letterSpacing: ".1em", cursor: "pointer", textTransform: "uppercase", boxShadow: "0 4px 22px rgba(196,163,90,.28)", marginBottom: "1.75rem", transition: "background .4s" }}>🎲 Roll My Playthrough</button>
 
         {res && (
           <div className="fu">
             <div style={cardSt}>
               <h3 style={secTitle}>🧙 Your Character</h3>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: ".85rem", marginBottom: ".85rem" }}>
-                {[
-                  { l: "Origin", v: res.origin },
-                  { l: "Race", v: res.pRace },
-                  { l: "Background", v: res.bg },
-                ].map(i => (
+                {[{ l: "Origin", v: res.origin }, { l: "Race", v: res.pRace }, { l: "Background", v: res.bg }].map(i => (
                   <div key={i.l} style={{ background: "rgba(196,163,90,.07)", borderRadius: "8px", padding: ".9rem", borderLeft: "3px solid rgba(196,163,90,.5)" }}>
                     <div style={lbl}>{i.l}</div>
                     <div style={{ fontSize: "1rem", fontWeight: "bold", color: "#f5e090" }}>{i.v}</div>
@@ -209,15 +302,12 @@ export default function App() {
 
             <div style={cardSt}>
               <h3 style={secTitle}>⚖️ Key Decisions</h3>
-              {res.decisions.map(d => (
-                <div key={d.cat} style={{ display: "flex", alignItems: "flex-start", gap: ".75rem", padding: ".75rem .9rem", background: "rgba(196,163,90,.05)", borderRadius: "8px", border: "1px solid rgba(196,163,90,.1)", marginBottom: ".55rem" }}>
-                  <span style={{ fontSize: "1.15rem", flexShrink: 0, marginTop: "1px" }}>{DEMOJI[d.cat] || "📌"}</span>
-                  <div>
-                    <div style={lbl}>{d.cat}</div>
-                    <div style={{ color: "#f5e090", fontSize: ".93rem" }}>{d.choice}</div>
-                  </div>
-                </div>
-              ))}
+              {res.decisions.map(d => <DecisionRow key={d.cat} d={d} />)}
+            </div>
+
+            <div style={cardSt}>
+              <h3 style={secTitle}>🧩 Companion Quests</h3>
+              {res.companionQuests.map(d => <DecisionRow key={d.cat} d={d} />)}
             </div>
 
             <div style={{ display: "flex", gap: ".75rem" }}>
