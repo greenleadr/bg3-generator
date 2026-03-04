@@ -41,7 +41,7 @@ const DATA = {
     "Githyanki": ["Githyanki"],
     "Dragonborn": ["Black Dragonborn", "Blue Dragonborn", "Brass Dragonborn", "Bronze Dragonborn", "Copper Dragonborn", "Gold Dragonborn", "Green Dragonborn", "Red Dragonborn", "Silver Dragonborn", "White Dragonborn"],
   },
-  backgrounds: ["Acolyte", "Charlatan", "Criminal", "Entertainer", "Folk Hero", "Guild Artisan", "Haunted One", "Noble", "Outlander", "Sage", "Soldier", "Urchin"],
+  backgrounds: ["Acolyte", "Charlatan", "Criminal", "Entertainer", "Folk Hero", "Guild Artisan","Noble", "Outlander", "Sage", "Soldier", "Urchin"],
   companions: [
     { name: "Shadowheart", act: 1 }, { name: "Astarion", act: 1 }, { name: "Gale", act: 1 },
     { name: "Lae'zel", act: 1 }, { name: "Wyll", act: 1 }, { name: "Karlach", act: 1 },
