@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import emailjs from "@emailjs/browser";
 
 const DATA = {
   classes: {
@@ -41,13 +42,12 @@ const DATA = {
     "Githyanki": ["Githyanki"],
     "Dragonborn": ["Black Dragonborn", "Blue Dragonborn", "Brass Dragonborn", "Bronze Dragonborn", "Copper Dragonborn", "Gold Dragonborn", "Green Dragonborn", "Red Dragonborn", "Silver Dragonborn", "White Dragonborn"],
   },
-  backgrounds: ["Acolyte", "Charlatan", "Criminal", "Entertainer", "Folk Hero", "Guild Artisan","Noble", "Outlander", "Sage", "Soldier", "Urchin"],
+  backgrounds: ["Acolyte", "Charlatan", "Criminal", "Entertainer", "Folk Hero", "Guild Artisan", "Noble", "Outlander", "Sage", "Soldier", "Urchin"],
   companions: [
     { name: "Shadowheart", act: 1 }, { name: "Astarion", act: 1 }, { name: "Gale", act: 1 },
     { name: "Lae'zel", act: 1 }, { name: "Wyll", act: 1 }, { name: "Karlach", act: 1 },
     { name: "Halsin", act: 2 }, { name: "Minthara", act: 2 }, { name: "Jaheira", act: 2 }, { name: "Minsc", act: 3 },
   ],
-  // alignment: "good" | "evil" | null
   decisions: {
     safe: [
       { cat: "Alignment", opts: [
@@ -127,7 +127,7 @@ function weightedPick(opts, alignment) {
   if (!alignment) return pick(opts);
   const aligned = opts.filter(o => o.align === alignment);
   const neutral = opts.filter(o => o.align === null);
-  const pool = [...aligned, ...aligned, ...neutral]; // 2:1 weight toward alignment
+  const pool = [...aligned, ...aligned, ...neutral];
   return pick(pool.length ? pool : opts);
 }
 
@@ -136,18 +136,15 @@ function generate(sp, cm, alignment) {
   const pool = cm === "party" ? DATA.companions.filter(c => c.act === 1) : DATA.companions;
   const count = cm === "party" ? 3 : cm === "random" ? Math.floor(Math.random() * 4) + 3 : parseInt(cm);
   const comps = pickN(pool, count).map(c => { const ac = pick(CLS); return { ...c, cls: ac, sub: pick(DATA.classes[ac]) }; });
-
   const decisionSets = sp === "safe" ? DATA.decisions.safe : [...DATA.decisions.safe, ...DATA.decisions.spoiler];
   const decisions = decisionSets.map(d => {
     const chosen = weightedPick(d.opts, alignment);
     return { cat: d.cat, choice: chosen.text, align: chosen.align };
   });
-
   const companionQuests = DATA.companionQuests.map(d => {
     const chosen = weightedPick(d.opts, alignment);
     return { cat: d.cat, choice: chosen.text, align: chosen.align };
   });
-
   return {
     origin: sp === "safe" ? "Custom Character (Tav)" : weightedPick([
       { text: "Custom Character (Tav)", align: "good" },
@@ -174,6 +171,10 @@ export default function App() {
   const [alignment, setAlignment] = useState(null);
   const [res, setRes] = useState(null);
   const [ok, setOk] = useState(false);
+  const [showFeature, setShowFeature] = useState(false);
+  const [featureText, setFeatureText] = useState("");
+  const [submitStatus, setSubmitStatus] = useState("idle");
+
   const roll = useCallback(() => { setRes(generate(sp, cm, alignment)); setOk(false); }, [sp, cm, alignment]);
 
   const copy = () => {
@@ -194,6 +195,26 @@ export default function App() {
       ...res.companionQuests.map(d => `${d.cat}: ${d.choice}`),
     ].join("\n");
     navigator.clipboard.writeText(txt).then(() => { setOk(true); setTimeout(() => setOk(false), 2500); });
+  };
+
+  const submitFeature = async () => {
+    if (!featureText.trim()) return;
+    setSubmitStatus("sending");
+    try {
+      await emailjs.send(
+        "service_lmctiqe",
+        "template_gn9uspd",
+        { message: featureText },
+        "tJsPBE_KNDTMKvTdS"
+      );
+      setSubmitStatus("sent");
+      setFeatureText("");
+      setTimeout(() => setSubmitStatus("idle"), 4000);
+    } catch (err) {
+      console.error(err);
+      setSubmitStatus("error");
+      setTimeout(() => setSubmitStatus("idle"), 4000);
+    }
   };
 
   const OBtn = ({ v, cur, set, main, sub }) => (
@@ -235,6 +256,8 @@ export default function App() {
       </header>
 
       <div style={{ maxWidth: "820px", margin: "0 auto", padding: "2rem 1.25rem" }}>
+
+        {/* Options */}
         <div style={cardSt}>
           <h2 style={secTitle}>⚙️ Options</h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.25rem" }}>
@@ -259,8 +282,10 @@ export default function App() {
           {alignment && <div style={{ marginTop: ".75rem", fontSize: ".78rem", color: "#907050", fontStyle: "italic" }}>Alignment labels will appear on your rolled decisions. Choices are weighted but not guaranteed — chaos finds a way.</div>}
         </div>
 
+        {/* Roll button */}
         <button onClick={roll} style={{ width: "100%", padding: "1.05rem", background: alignment === "evil" ? "linear-gradient(135deg,#5a1020,#c04060,#5a1020)" : alignment === "good" ? "linear-gradient(135deg,#1a4a20,#40a060,#1a4a20)" : "linear-gradient(135deg,#7a5910,#c4a35a,#7a5910)", border: "none", borderRadius: "10px", color: "#fff", fontFamily: "Georgia,serif", fontSize: "1.05rem", fontWeight: "bold", letterSpacing: ".1em", cursor: "pointer", textTransform: "uppercase", boxShadow: "0 4px 22px rgba(196,163,90,.28)", marginBottom: "1.75rem", transition: "background .4s" }}>🎲 Roll My Playthrough</button>
 
+        {/* Results */}
         {res && (
           <div className="fu">
             <div style={cardSt}>
@@ -310,17 +335,56 @@ export default function App() {
               {res.companionQuests.map(d => <DecisionRow key={d.cat} d={d} />)}
             </div>
 
-            <div style={{ display: "flex", gap: ".75rem" }}>
+            <div style={{ display: "flex", gap: ".75rem", marginBottom: "1.75rem" }}>
               <button onClick={roll} style={{ flex: 1, padding: ".85rem", background: "rgba(196,163,90,.1)", border: "1px solid rgba(196,163,90,.3)", borderRadius: "8px", color: "#c4a35a", fontFamily: "Georgia,serif", fontSize: ".9rem", cursor: "pointer", letterSpacing: ".05em" }}>🎲 Reroll</button>
               <button onClick={copy} style={{ flex: 1, padding: ".85rem", background: ok ? "rgba(80,160,80,.13)" : "rgba(196,163,90,.1)", border: ok ? "1px solid rgba(80,160,80,.35)" : "1px solid rgba(196,163,90,.3)", borderRadius: "8px", color: ok ? "#90d090" : "#c4a35a", fontFamily: "Georgia,serif", fontSize: ".9rem", cursor: "pointer", transition: "all .25s" }}>{ok ? "✅ Copied!" : "📋 Copy to Clipboard"}</button>
             </div>
           </div>
         )}
 
-        <div style={{ textAlign: "center", marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(196,163,90,.12)", color: "#4a3f28", fontSize: ".75rem" }}>
+        {/* Feature Request */}
+        <div style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(196,163,90,.22)", borderRadius: "12px", overflow: "hidden", marginBottom: "1.25rem" }}>
+          <button
+            onClick={() => setShowFeature(!showFeature)}
+            style={{ width: "100%", padding: "1rem 1.5rem", background: "none", border: "none", cursor: "pointer", color: "#c4a35a", fontFamily: "Georgia,serif", fontSize: ".9rem", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>💡 Request a Feature</span>
+            <span style={{ fontSize: ".8rem", opacity: .6 }}>{showFeature ? "▲ collapse" : "▼ expand"}</span>
+          </button>
+          {showFeature && (
+            <div style={{ padding: "0 1.5rem 1.5rem", borderTop: "1px solid rgba(196,163,90,.15)" }}>
+              <p style={{ fontSize: ".85rem", color: "#907050", margin: ".9rem 0 .75rem", fontStyle: "italic" }}>Got an idea to make this generator better? Let us know.</p>
+              <textarea
+                value={featureText}
+                onChange={e => setFeatureText(e.target.value)}
+                placeholder="Describe your feature idea..."
+                rows={4}
+                style={{ width: "100%", background: "rgba(255,255,255,.04)", border: "1px solid rgba(196,163,90,.25)", borderRadius: "8px", padding: ".75rem", color: "#e8d5a3", fontFamily: "Georgia,serif", fontSize: ".9rem", resize: "vertical", boxSizing: "border-box", outline: "none" }}
+              />
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: ".75rem" }}>
+                <button
+                  onClick={submitFeature}
+                  disabled={submitStatus === "sending" || !featureText.trim()}
+                  style={{ padding: ".7rem 1.5rem", background: submitStatus === "sent" ? "rgba(80,160,80,.2)" : "rgba(196,163,90,.15)", border: submitStatus === "sent" ? "1px solid rgba(80,160,80,.4)" : "1px solid rgba(196,163,90,.35)", borderRadius: "8px", color: submitStatus === "sent" ? "#90d090" : "#c4a35a", fontFamily: "Georgia,serif", fontSize: ".9rem", cursor: submitStatus === "sending" || !featureText.trim() ? "not-allowed" : "pointer", opacity: !featureText.trim() ? .5 : 1, transition: "all .25s" }}>
+                  {submitStatus === "sending" ? "Sending..." : submitStatus === "sent" ? "✅ Sent!" : submitStatus === "error" ? "❌ Failed — try again" : "Send Request"}
+                </button>
+                {submitStatus === "sent" && <span style={{ fontSize: ".8rem", color: "#907050", fontStyle: "italic" }}>Thanks! We'll consider it for a future update.</span>}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ textAlign: "center", marginTop: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(196,163,90,.12)", color: "#4a3f28", fontSize: ".75rem" }}>
           All 12 classes · 46+ subclasses · 11 races · 10 companions · Patch 8<br />
           <span style={{ fontStyle: "italic" }}>The Forgotten Realms await. May the dice be in your favour.</span>
+          <div style={{ marginTop: "1rem" }}>
+            <a href="https://account.venmo.com/u/greenleadermusic" target="_blank" rel="noopener noreferrer"
+              style={{ display: "inline-block", padding: ".5rem 1.25rem", background: "rgba(196,163,90,.12)", border: "1px solid rgba(196,163,90,.3)", borderRadius: "8px", color: "#c4a35a", textDecoration: "none", fontFamily: "Georgia,serif", fontSize: ".85rem", letterSpacing: ".05em" }}>
+              💛 Donate via Venmo
+            </a>
+          </div>
         </div>
+
       </div>
     </div>
   );
